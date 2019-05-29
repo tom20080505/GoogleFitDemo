@@ -2,6 +2,9 @@ package com.soft.fitdemo;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +14,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
+import com.google.android.gms.fitness.data.HealthDataTypes;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -52,6 +57,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_LOCATION) {
+            if(grantResults.length == 1
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // We can now safely use the API we requested access to
+                Location myLocation =
+                        LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            } else {
+                // Permission was denied or request was cancelled
+            }
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
     }
@@ -78,7 +101,8 @@ public class MainActivity extends AppCompatActivity
                 .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .build();
 
-        DataSource.Builder bloodPressureSource = (DataSource.Builder) new DataSource.Builder().setDataType();
+        DataSource.Builder bloodPressureSource = (DataSource.Builder) new DataSource.Builder()
+                .setDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE);
     }
 
 
@@ -103,7 +127,6 @@ public class MainActivity extends AppCompatActivity
         long startTime = cal.getTimeInMillis();
 
 
-
-
     }
+}
 
