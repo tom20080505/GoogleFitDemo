@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -30,6 +31,14 @@ import com.google.android.gms.location.LocationServices;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+
+import static com.google.android.gms.fitness.data.HealthFields.BLOOD_PRESSURE_MEASUREMENT_LOCATION_LEFT_UPPER_ARM;
+import static com.google.android.gms.fitness.data.HealthFields.BODY_POSITION_SITTING;
+import static com.google.android.gms.fitness.data.HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC;
+import static com.google.android.gms.fitness.data.HealthFields.FIELD_BLOOD_PRESSURE_MEASUREMENT_LOCATION;
+import static com.google.android.gms.fitness.data.HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC;
+import static com.google.android.gms.fitness.data.HealthFields.FIELD_BODY_POSITION;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -136,15 +145,36 @@ public class MainActivity extends AppCompatActivity
         tvMsg.append("\n\t Start App.");
 
         //permissionCheck();
-        initialize(this);
+        //initialize(this);
 
-        //fitnessOptions = FitnessOptions.builder()
-        //        .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-        //        .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+        fitnessOptions = FitnessOptions.builder()
+                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .build();
+        tvMsg.append("\n\t fitnessOptions:" + fitnessOptions.getGoogleSignInAccount() + "\n, " +
+                fitnessOptions.getImpliedScopes());
+
+        permissionCheck();
+
+
+        //DataSource bloodPressureSource = new DataSource.Builder()
+        //        .setDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE)
+        //        .setAppPackageName(this.getBaseContext())
+        //        .setStreamName(TAG + " - blood pressure")
+        //        .setType(DataSource.TYPE_RAW)
         //        .build();
         //
-        //DataSource.Builder bloodPressureSource = (DataSource.Builder) new DataSource.Builder()
-        //        .setDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE);
+        //DataPoint bloodPressure = (DataPoint) DataPoint.create(bloodPressureSource);
+        //bloodPressure.setTimestamp(SystemClock.currentThreadTimeMillis(), MILLISECONDS);
+        //bloodPressure.getValue(FIELD_BLOOD_PRESSURE_SYSTOLIC).setFloat(120.0f);
+        //bloodPressure.getValue(FIELD_BLOOD_PRESSURE_DIASTOLIC).setFloat(80.0f);
+        //bloodPressure.getValue(FIELD_BODY_POSITION).setInt(BODY_POSITION_SITTING);
+        //bloodPressure.getValue(FIELD_BLOOD_PRESSURE_MEASUREMENT_LOCATION)
+        //        .setInt(BLOOD_PRESSURE_MEASUREMENT_LOCATION_LEFT_UPPER_ARM);
+
+
+        //tvMsg.append("\n\t bloodPressure:" + bloodPressure.toString() );
+
     }
 
 
@@ -158,7 +188,7 @@ public class MainActivity extends AppCompatActivity
                     GoogleSignIn.getLastSignedInAccount(this),
                     fitnessOptions);
         } else {
-            initialize(this);
+            //initialize(this);
             accessGoogleFit();
         }
     }
@@ -171,7 +201,29 @@ public class MainActivity extends AppCompatActivity
         cal.add(Calendar.YEAR, -1);
         long startTime = cal.getTimeInMillis();
 
+        //mlc add
+        testBloodpressure();
+    }
 
+
+    private void testBloodpressure()
+    {
+        DataSource bloodPressureSource = new DataSource.Builder()
+                .setDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE)
+                .setAppPackageName(this.getBaseContext())
+                .setStreamName(TAG + " - blood pressure")
+                .setType(DataSource.TYPE_RAW)
+                .build();
+
+        DataPoint bloodPressure = (DataPoint) DataPoint.create(bloodPressureSource);
+        bloodPressure.setTimestamp(SystemClock.currentThreadTimeMillis(), MILLISECONDS);
+        bloodPressure.getValue(FIELD_BLOOD_PRESSURE_SYSTOLIC).setFloat(120.0f);
+        bloodPressure.getValue(FIELD_BLOOD_PRESSURE_DIASTOLIC).setFloat(80.0f);
+        bloodPressure.getValue(FIELD_BODY_POSITION).setInt(BODY_POSITION_SITTING);
+        bloodPressure.getValue(FIELD_BLOOD_PRESSURE_MEASUREMENT_LOCATION)
+                .setInt(BLOOD_PRESSURE_MEASUREMENT_LOCATION_LEFT_UPPER_ARM);
+
+        tvMsg.append("\n\t bloodPressure:" + bloodPressure.toString() );
     }
 
 
