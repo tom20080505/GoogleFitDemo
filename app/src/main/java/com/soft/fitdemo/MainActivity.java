@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -149,6 +150,7 @@ public class MainActivity extends AppCompatActivity
     private void initControl()
     {
         Log.w(TAG, " initControl(), ");
+        tvMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
         tvMsg.append("\n\t Start App.");
 
         //permissionCheck();
