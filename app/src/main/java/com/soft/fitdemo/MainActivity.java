@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -18,23 +20,29 @@ import android.widget.Toast;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataPoint;
+import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.HealthDataTypes;
 import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.request.OnDataPointListener;
 import com.google.android.gms.fitness.result.DataReadResponse;
-import com.google.android.gms.location.LocationServices;
+//import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -82,13 +90,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        //super.onActivityResult(requestCode, resultCode, data);
         Log.w(TAG, "onActivityResult(), requestCode: " + requestCode +
                         ", resultCode: " + resultCode +
                         "\n ,data: " + data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == GOOGLE_FIT_PERMISSIONS_REQUEST_CODE) {
-                accessGoogleFit();
+                //accessGoogleFit();
+                testBloodpressure();
             }
         }
     }
@@ -157,13 +166,23 @@ public class MainActivity extends AppCompatActivity
         //initialize(this);
 
         fitnessOptions = FitnessOptions.builder()
-                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                //.addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                //.addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .addDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE, FitnessOptions.ACCESS_READ)
                 .build();
-        tvMsg.append("\n\t fitnessOptions:" + fitnessOptions.getGoogleSignInAccount() + "\n, " +
-                fitnessOptions.getImpliedScopes());
+        //tvMsg.append("\n\t fitnessOptions:" + fitnessOptions.getGoogleSignInAccount() + "\n, " +
+        //        fitnessOptions.getImpliedScopes());
 
-        permissionCheck();
+        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(this), fitnessOptions)) {
+            GoogleSignIn.requestPermissions(
+                    this, // your activity
+                    GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
+                    GoogleSignIn.getLastSignedInAccount(this),
+                    fitnessOptions);
+        } else {
+            //initialize(this);
+            accessGoogleFit();
+        }
 
 
         //DataSource bloodPressureSource = new DataSource.Builder()
@@ -187,20 +206,20 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void permissionCheck()
-    {
-        Log.w(TAG, " permissionCheck(), ");
-        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(this), fitnessOptions)) {
-            GoogleSignIn.requestPermissions(
-                    this, // your activity
-                    GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
-                    GoogleSignIn.getLastSignedInAccount(this),
-                    fitnessOptions);
-        } else {
-            //initialize(this);
-            accessGoogleFit();
-        }
-    }
+    //private void permissionCheck()
+    //{
+    //    Log.w(TAG, " permissionCheck(), ");
+    //    if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(this), fitnessOptions)) {
+    //        GoogleSignIn.requestPermissions(
+    //                this, // your activity
+    //                GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
+    //                GoogleSignIn.getLastSignedInAccount(this),
+    //                fitnessOptions);
+    //    } else {
+    //        //initialize(this);
+    //        accessGoogleFit();
+    //    }
+    //}
 
     private void accessGoogleFit() {
         Log.w(TAG, " accessGoogleFit(), ");
@@ -215,6 +234,25 @@ public class MainActivity extends AppCompatActivity
                 .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
                 .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
                 .bucketByTime(1, TimeUnit.DAYS)
+                .build();
+
+        GoogleApiClient mClient = new GoogleApiClient.Builder(this)
+                .addApi(Fitness.HISTORY_API)
+                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
+                .addScope(new Scope(Scopes.FITNESS_BODY_READ))
+                .addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE))
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+                        Log.w(TAG, "Connected !!!");
+                        //new InsertAndVerifyDataTask().exec
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+
+                    }
+                })
                 .build();
 
         Fitness.getHistoryClient(this, GoogleSignIn.getLastSignedInAccount(this))
@@ -317,5 +355,19 @@ public class MainActivity extends AppCompatActivity
                 .build();
         //mGoogleApiClient.connect();
     }
+
+    private class InsertAndVerifyDataTask extends AsyncTask<Void, Void, Void>
+    {
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            /*
+            DataSet dataSet = insertFit
+            return null;
+            */
+        }
+    };
+
 }
 
