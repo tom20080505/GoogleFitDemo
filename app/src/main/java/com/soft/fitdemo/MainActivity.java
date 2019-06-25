@@ -168,7 +168,8 @@ public class MainActivity extends AppCompatActivity
         fitnessOptions = FitnessOptions.builder()
                 //.addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 //.addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                .addDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.TYPE_WEIGHT, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.AGGREGATE_WEIGHT_SUMMARY, FitnessOptions.ACCESS_READ)
                 .build();
         //tvMsg.append("\n\t fitnessOptions:" + fitnessOptions.getGoogleSignInAccount() + "\n, " +
         //        fitnessOptions.getImpliedScopes());
@@ -231,9 +232,13 @@ public class MainActivity extends AppCompatActivity
 
 
         DataReadRequest readRequest = new DataReadRequest.Builder()
-                .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
-                .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-                .bucketByTime(1, TimeUnit.DAYS)
+                .read(DataType.TYPE_WEIGHT)
+                .setTimeRange(1, cal.getTimeInMillis(), MILLISECONDS)
+                .setLimit(1)
+                //.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
+                //.aggregate(DataType.TYPE_WEIGHT, DataType.AGGREGATE_WEIGHT_SUMMARY)
+                //.setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+                //.bucketByTime(1, TimeUnit.DAYS)
                 .build();
 
         GoogleApiClient mClient = new GoogleApiClient.Builder(this)
@@ -265,7 +270,7 @@ public class MainActivity extends AppCompatActivity
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                tvMsg.append("\n, dataReadResponse: " + Arrays.toString(dataReadResponse.getBuckets().toArray()));
+                                tvMsg.append("\n, 2 dataReadResponse: " + Arrays.toString(dataReadResponse.getBuckets().toArray()));
                             }
                         });
                     }
@@ -284,7 +289,7 @@ public class MainActivity extends AppCompatActivity
                 });
 
         //mlc add
-        testBloodpressure();
+        //testBloodpressure();
     }
 
 
