@@ -3,7 +3,6 @@ package com.soft.fitdemo;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
@@ -154,8 +153,8 @@ public class MainActivity extends AppCompatActivity
         //initialize(this);
 
         fitnessOptions = FitnessOptions.builder()
-                //.addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                //.addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.TYPE_WEIGHT, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.AGGREGATE_WEIGHT_SUMMARY, FitnessOptions.ACCESS_READ)
                 .build();
@@ -215,7 +214,7 @@ public class MainActivity extends AppCompatActivity
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         long endTime = cal.getTimeInMillis();
-        cal.add(Calendar.YEAR, -1);
+        cal.add(Calendar.YEAR, -2);
         long startTime = cal.getTimeInMillis();
 
 
@@ -226,7 +225,7 @@ public class MainActivity extends AppCompatActivity
                 .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
                 .aggregate(DataType.TYPE_WEIGHT, DataType.AGGREGATE_WEIGHT_SUMMARY)
                 .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-                //.bucketByTime(1, TimeUnit.DAYS)
+                .bucketByTime(1, TimeUnit.DAYS)
                 .build();
 
         GoogleApiClient mClient = new GoogleApiClient.Builder(this)
@@ -361,7 +360,6 @@ public class MainActivity extends AppCompatActivity
     //        DataSet dataSet = insertFit
     //        return null;
     //        */
-    //        return null;
     //    }
     //};
 
