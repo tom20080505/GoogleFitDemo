@@ -3,14 +3,12 @@ package com.soft.fitdemo;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.AsyncTask;
 import android.os.SystemClock;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -20,15 +18,11 @@ import android.widget.Toast;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataPoint;
-import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.HealthDataTypes;
@@ -41,8 +35,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -96,8 +88,8 @@ public class MainActivity extends AppCompatActivity
                         "\n ,data: " + data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == GOOGLE_FIT_PERMISSIONS_REQUEST_CODE) {
-                //accessGoogleFit();
-                testBloodpressure();
+                accessGoogleFit();
+                //testBloodpressure();
             }
         }
     }
@@ -166,8 +158,8 @@ public class MainActivity extends AppCompatActivity
         //initialize(this);
 
         fitnessOptions = FitnessOptions.builder()
-                //.addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                //.addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.TYPE_WEIGHT, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.AGGREGATE_WEIGHT_SUMMARY, FitnessOptions.ACCESS_READ)
                 .build();
@@ -227,18 +219,18 @@ public class MainActivity extends AppCompatActivity
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         long endTime = cal.getTimeInMillis();
-        cal.add(Calendar.YEAR, -1);
+        cal.add(Calendar.YEAR, -2);
         long startTime = cal.getTimeInMillis();
 
 
         DataReadRequest readRequest = new DataReadRequest.Builder()
-                .read(DataType.TYPE_WEIGHT)
-                .setTimeRange(1, cal.getTimeInMillis(), MILLISECONDS)
-                .setLimit(1)
-                //.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
-                //.aggregate(DataType.TYPE_WEIGHT, DataType.AGGREGATE_WEIGHT_SUMMARY)
-                //.setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-                //.bucketByTime(1, TimeUnit.DAYS)
+                //.read(DataType.TYPE_WEIGHT)
+                //.setTimeRange(1, cal.getTimeInMillis(), MILLISECONDS)
+                //.setLimit(1)
+                .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
+                .aggregate(DataType.TYPE_WEIGHT, DataType.AGGREGATE_WEIGHT_SUMMARY)
+                .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+                .bucketByTime(1, TimeUnit.DAYS)
                 .build();
 
         GoogleApiClient mClient = new GoogleApiClient.Builder(this)
@@ -361,18 +353,18 @@ public class MainActivity extends AppCompatActivity
         //mGoogleApiClient.connect();
     }
 
-    private class InsertAndVerifyDataTask extends AsyncTask<Void, Void, Void>
-    {
-
-        @Override
-        protected Void doInBackground(Void... params)
-        {
-            /*
-            DataSet dataSet = insertFit
-            return null;
-            */
-        }
-    };
+    //private class InsertAndVerifyDataTask extends AsyncTask<Void, Void, Void>
+    //{
+    //
+    //    @Override
+    //    protected Void doInBackground(Void... params)
+    //    {
+    //        /*
+    //        DataSet dataSet = insertFit
+    //        return null;
+    //        */
+    //    }
+    //};
 
 }
 
