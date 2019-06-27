@@ -3,14 +3,13 @@ package com.soft.fitdemo;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.SystemClock;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -20,15 +19,11 @@ import android.widget.Toast;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataPoint;
-import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.HealthDataTypes;
@@ -41,19 +36,12 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.android.gms.fitness.data.HealthFields.BLOOD_PRESSURE_MEASUREMENT_LOCATION_LEFT_UPPER_ARM;
-import static com.google.android.gms.fitness.data.HealthFields.BODY_POSITION_SITTING;
-import static com.google.android.gms.fitness.data.HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC;
-import static com.google.android.gms.fitness.data.HealthFields.FIELD_BLOOD_PRESSURE_MEASUREMENT_LOCATION;
-import static com.google.android.gms.fitness.data.HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC;
-import static com.google.android.gms.fitness.data.HealthFields.FIELD_BODY_POSITION;
+import static com.google.android.gms.fitness.data.HealthFields.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class MainActivity extends AppCompatActivity
@@ -96,8 +84,8 @@ public class MainActivity extends AppCompatActivity
                         "\n ,data: " + data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == GOOGLE_FIT_PERMISSIONS_REQUEST_CODE) {
-                //accessGoogleFit();
-                testBloodpressure();
+                accessGoogleFit();
+                //testBloodpressure();
             }
         }
     }
@@ -232,20 +220,22 @@ public class MainActivity extends AppCompatActivity
 
 
         DataReadRequest readRequest = new DataReadRequest.Builder()
-                .read(DataType.TYPE_WEIGHT)
-                .setTimeRange(1, cal.getTimeInMillis(), MILLISECONDS)
-                .setLimit(1)
-                //.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
-                //.aggregate(DataType.TYPE_WEIGHT, DataType.AGGREGATE_WEIGHT_SUMMARY)
-                //.setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+                //.read(DataType.TYPE_WEIGHT)
+                //.setTimeRange(1, cal.getTimeInMillis(), MILLISECONDS)
+                //.setLimit(1)
+                .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
+                .aggregate(DataType.TYPE_WEIGHT, DataType.AGGREGATE_WEIGHT_SUMMARY)
+                .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
                 //.bucketByTime(1, TimeUnit.DAYS)
                 .build();
 
         GoogleApiClient mClient = new GoogleApiClient.Builder(this)
                 .addApi(Fitness.HISTORY_API)
+                .addApi(Fitness.SESSIONS_API)
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
                 .addScope(new Scope(Scopes.FITNESS_BODY_READ))
                 .addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE))
+                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                     @Override
                     public void onConnected(@Nullable Bundle bundle) {
@@ -361,18 +351,19 @@ public class MainActivity extends AppCompatActivity
         //mGoogleApiClient.connect();
     }
 
-    private class InsertAndVerifyDataTask extends AsyncTask<Void, Void, Void>
-    {
-
-        @Override
-        protected Void doInBackground(Void... params)
-        {
-            /*
-            DataSet dataSet = insertFit
-            return null;
-            */
-        }
-    };
+    //private class InsertAndVerifyDataTask extends AsyncTask<Void, Void, Void>
+    //{
+    //
+    //    @Override
+    //    protected Void doInBackground(Void... params)
+    //    {
+    //        /*
+    //        DataSet dataSet = insertFit
+    //        return null;
+    //        */
+    //        return null;
+    //    }
+    //};
 
 }
 
