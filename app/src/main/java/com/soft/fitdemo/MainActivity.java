@@ -3,12 +3,13 @@ package com.soft.fitdemo;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -22,14 +23,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
-import com.google.android.gms.fitness.data.DataPoint;
-import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
-import com.google.android.gms.fitness.data.HealthDataTypes;
 import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.request.OnDataPointListener;
 import com.google.android.gms.fitness.result.DataReadResponse;
-//import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.fitness.result.DataReadResult;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -40,11 +38,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.android.gms.fitness.data.HealthFields.*;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
-public class MainActivity extends AppCompatActivity
-{
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 10;
@@ -64,12 +58,16 @@ public class MainActivity extends AppCompatActivity
         Log.w(TAG, "onCreate(), ");
 
         initView();
-        initControl();
+        //initControl();
     }
 
     @Override
     protected void onStart() {
+        initControl();
         super.onStart();
+        //mClient.connect();
+
+
         Log.w(TAG, "onStart(), ");
     }
 
@@ -126,6 +124,10 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         Log.w(TAG, "onStop(), ");
         super.onStop();
+        //if (mClient.isConnected())
+        {
+        ///    mClient.disconnect();
+        }
     }
 
     @Override
@@ -140,7 +142,7 @@ public class MainActivity extends AppCompatActivity
     private void initView()
     {
         Log.w(TAG, " initView(), ");
-        tvMsg = findViewById(R.id.tv_MSG);
+        tvMsg = findViewById(R.id.tv_MSG1);
     }
 
     private void initControl()
@@ -156,7 +158,9 @@ public class MainActivity extends AppCompatActivity
                 .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.TYPE_WEIGHT, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.TYPE_HEIGHT, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.AGGREGATE_WEIGHT_SUMMARY, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.AGGREGATE_HEIGHT_SUMMARY, FitnessOptions.ACCESS_READ)
                 .build();
         //tvMsg.append("\n\t fitnessOptions:" + fitnessOptions.getGoogleSignInAccount() + "\n, " +
         //        fitnessOptions.getImpliedScopes());
@@ -209,32 +213,36 @@ public class MainActivity extends AppCompatActivity
     //    }
     //}
 
+    GoogleApiClient mClient = null;
     private void accessGoogleFit() {
         Log.w(TAG, " accessGoogleFit(), ");
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         long endTime = cal.getTimeInMillis();
-        cal.add(Calendar.YEAR, -2);
+        cal.add(Calendar.YEAR, -1);
         long startTime = cal.getTimeInMillis();
 
 
-        DataReadRequest readRequest = new DataReadRequest.Builder()
+        final DataReadRequest readRequest = new DataReadRequest.Builder()
                 //.read(DataType.TYPE_WEIGHT)
                 //.setTimeRange(1, cal.getTimeInMillis(), MILLISECONDS)
                 //.setLimit(1)
-                .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
+                //.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
                 .aggregate(DataType.TYPE_WEIGHT, DataType.AGGREGATE_WEIGHT_SUMMARY)
                 .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
                 .bucketByTime(1, TimeUnit.DAYS)
                 .build();
 
-        GoogleApiClient mClient = new GoogleApiClient.Builder(this)
+        //GoogleApiClient mClient = new GoogleApiClient.Builder(this)
+        mClient = new GoogleApiClient.Builder(this)
                 .addApi(Fitness.HISTORY_API)
-                .addApi(Fitness.SESSIONS_API)
-                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
+                //.addApi(Fitness.SESSIONS_API)
+                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
                 .addScope(new Scope(Scopes.FITNESS_BODY_READ))
-                .addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE))
-                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
+                .addScope(new Scope(Scopes.FITNESS_LOCATION_READ))
+                .addScope(new Scope(Scopes.FITNESS_NUTRITION_READ))
+                //.addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE))
+                //.addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                     @Override
                     public void onConnected(@Nullable Bundle bundle) {
@@ -247,7 +255,17 @@ public class MainActivity extends AppCompatActivity
 
                     }
                 })
+                .addOnConnectionFailedListener(this)
                 .build();
+
+        //final DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
+                tvMsg.append("\n, 2 dataReadResult: " + Arrays.toString(new String[]{dataReadResult.getBuckets().toArray().toString()}));
+            }
+        });
 
         Fitness.getHistoryClient(this, GoogleSignIn.getLastSignedInAccount(this))
                 .readData(readRequest)
@@ -256,12 +274,12 @@ public class MainActivity extends AppCompatActivity
                     public void onSuccess(final DataReadResponse dataReadResponse) {
                         Log.w(TAG, "onSuccess(), dataReadResponse: " + Arrays.toString(dataReadResponse.getBuckets().toArray()));
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                tvMsg.append("\n, 2 dataReadResponse: " + Arrays.toString(dataReadResponse.getBuckets().toArray()));
-                            }
-                        });
+                        //runOnUiThread(new Runnable() {
+                        //    @Override
+                        //    public void run() {
+                        //        tvMsg.append("\n, 2 dataReadResponse: " + Arrays.toString(dataReadResponse.getBuckets().toArray()));
+                        //    }
+                        //});
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -277,30 +295,33 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
+
+
+
         //mlc add
         //testBloodpressure();
     }
 
 
-    private void testBloodpressure()
-    {
-        DataSource bloodPressureSource = new DataSource.Builder()
-                .setDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE)
-                .setAppPackageName(this.getBaseContext())
-                .setStreamName(TAG + " - blood pressure")
-                .setType(DataSource.TYPE_RAW)
-                .build();
-
-        DataPoint bloodPressure = (DataPoint) DataPoint.create(bloodPressureSource);
-        bloodPressure.setTimestamp(SystemClock.currentThreadTimeMillis(), MILLISECONDS);
-        bloodPressure.getValue(FIELD_BLOOD_PRESSURE_SYSTOLIC).setFloat(120.0f);
-        bloodPressure.getValue(FIELD_BLOOD_PRESSURE_DIASTOLIC).setFloat(80.0f);
-        bloodPressure.getValue(FIELD_BODY_POSITION).setInt(BODY_POSITION_SITTING);
-        bloodPressure.getValue(FIELD_BLOOD_PRESSURE_MEASUREMENT_LOCATION)
-                .setInt(BLOOD_PRESSURE_MEASUREMENT_LOCATION_LEFT_UPPER_ARM);
-
-        tvMsg.append("\n\t bloodPressure:" + bloodPressure.toString() );
-    }
+    //private void testBloodpressure()
+    //{
+    //    DataSource bloodPressureSource = new DataSource.Builder()
+    //            .setDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE)
+    //            .setAppPackageName(this.getBaseContext())
+    //            .setStreamName(TAG + " - blood pressure")
+    //            .setType(DataSource.TYPE_RAW)
+    //            .build();
+    //
+    //    DataPoint bloodPressure = (DataPoint) DataPoint.create(bloodPressureSource);
+    //    bloodPressure.setTimestamp(SystemClock.currentThreadTimeMillis(), MILLISECONDS);
+    //    bloodPressure.getValue(FIELD_BLOOD_PRESSURE_SYSTOLIC).setFloat(120.0f);
+    //    bloodPressure.getValue(FIELD_BLOOD_PRESSURE_DIASTOLIC).setFloat(80.0f);
+    //    bloodPressure.getValue(FIELD_BODY_POSITION).setInt(BODY_POSITION_SITTING);
+    //    bloodPressure.getValue(FIELD_BLOOD_PRESSURE_MEASUREMENT_LOCATION)
+    //            .setInt(BLOOD_PRESSURE_MEASUREMENT_LOCATION_LEFT_UPPER_ARM);
+    //
+    //    tvMsg.append("\n\t bloodPressure:" + bloodPressure.toString() );
+    //}
 
 
     public static void initialize(final FragmentActivity activity){
@@ -349,6 +370,19 @@ public class MainActivity extends AppCompatActivity
                 .build();
         //mGoogleApiClient.connect();
     }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    private class ResultTask extends AsyncTask<Void, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
+    };
 
     //private class InsertAndVerifyDataTask extends AsyncTask<Void, Void, Void>
     //{
