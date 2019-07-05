@@ -214,16 +214,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     //}
 
     GoogleApiClient mClient = null;
+    DataReadRequest readRequest = null;
     private void accessGoogleFit() {
         Log.w(TAG, " accessGoogleFit(), ");
         Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
+        //cal.setTime(new Date());
         long endTime = cal.getTimeInMillis();
         cal.add(Calendar.YEAR, -1);
         long startTime = cal.getTimeInMillis();
 
 
-        final DataReadRequest readRequest = new DataReadRequest.Builder()
+        readRequest = new DataReadRequest.Builder()
                 //.read(DataType.TYPE_WEIGHT)
                 //.setTimeRange(1, cal.getTimeInMillis(), MILLISECONDS)
                 //.setLimit(1)
@@ -259,13 +260,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .build();
 
         //final DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
-                tvMsg.append("\n, 2 dataReadResult: " + Arrays.toString(new String[]{dataReadResult.getBuckets().toArray().toString()}));
-            }
-        });
+        //runOnUiThread(new Runnable() {
+        //    @Override
+        //    public void run() {
+        //        DataReadResult dataReadResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
+        //        tvMsg.append("\n, 2 dataReadResult: " + Arrays.toString(new String[]{dataReadResult.getBuckets().toArray().toString()}));
+        //    }
+        //});
 
         Fitness.getHistoryClient(this, GoogleSignIn.getLastSignedInAccount(this))
                 .readData(readRequest)
@@ -295,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     }
                 });
 
-
+        new ResultTask().execute();
 
 
         //mlc add
@@ -369,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .addApi(Fitness.HISTORY_API)
                 .build();
         //mGoogleApiClient.connect();
-    }
+    }www
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -380,6 +381,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     {
         @Override
         protected Void doInBackground(Void... voids) {
+            long startTime = Calendar.getInstance().getTimeInMillis() - (31536000  *1000);
+            long endTime = Calendar.getInstance().getTimeInMillis();
+
+            DataReadResult readResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
+
+            Log.w(TAG, " doInBackground(), startTime: " + startTime + ", endTime: " + endTime +
+                    ", readResult: " + readResult.toString());
+            tvMsg.setText(readResult.toString());
+
             return null;
         }
     };
