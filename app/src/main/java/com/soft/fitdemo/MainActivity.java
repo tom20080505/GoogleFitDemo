@@ -393,10 +393,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             Log.w(TAG, " doInBackground() ");
 
             //Log.w(TAG, " doInBackground(), startTime: " + (new Date().setTime(startTime)).t + ", endTime: " + endTime );
-            DataReadResult readResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
+            final DataReadResult readResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
 
             Log.w(TAG, " readResult: " + readResult.toString());
-            tvMsg.setText(readResult.toString());
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    tvMsg.setText(readResult.toString());
+                }
+            });
+            //tvMsg.setText(readResult.toString());
 
             return null;
         }
