@@ -1,5 +1,6 @@
 package com.soft.fitdemo;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,6 +24,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
+import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.request.OnDataPointListener;
@@ -216,12 +218,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     GoogleApiClient mClient = null;
     DataReadRequest readRequest = null;
     private void accessGoogleFit() {
-        Log.w(TAG, " accessGoogleFit(), ");
         Calendar cal = Calendar.getInstance();
         //cal.setTime(new Date());
         long endTime = cal.getTimeInMillis();
-        cal.add(Calendar.YEAR, -1);
+        Log.w(TAG, " 1 accessGoogleFit(), cal: " + cal.get(Calendar.MONTH));
+        cal.add(Calendar.MONTH, -3);
         long startTime = cal.getTimeInMillis();
+        Log.w(TAG, " 2, cal: " + cal.get(Calendar.MONTH));
 
 
         readRequest = new DataReadRequest.Builder()
@@ -230,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 //.setLimit(1)
                 //.aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
                 .aggregate(DataType.TYPE_WEIGHT, DataType.AGGREGATE_WEIGHT_SUMMARY)
+                //.read(DataType.TYPE_WEIGHT)
                 .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
                 .bucketByTime(1, TimeUnit.DAYS)
                 .build();
@@ -370,24 +374,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .addApi(Fitness.HISTORY_API)
                 .build();
         //mGoogleApiClient.connect();
-    }www
+    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class ResultTask extends AsyncTask<Void, Void, Void>
     {
         @Override
         protected Void doInBackground(Void... voids) {
-            long startTime = Calendar.getInstance().getTimeInMillis() - (31536000  *1000);
-            long endTime = Calendar.getInstance().getTimeInMillis();
+            //Calendar cal2 = Calendar.getInstance();
+            //long endTime = cal2.getTimeInMillis();
+            //cal2.add(Calendar.YEAR, -3);
+            //long startTime = cal2.getTimeInMillis();
+            Log.w(TAG, " doInBackground() ");
 
+            //Log.w(TAG, " doInBackground(), startTime: " + (new Date().setTime(startTime)).t + ", endTime: " + endTime );
             DataReadResult readResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
 
-            Log.w(TAG, " doInBackground(), startTime: " + startTime + ", endTime: " + endTime +
-                    ", readResult: " + readResult.toString());
+            Log.w(TAG, " readResult: " + readResult.toString());
             tvMsg.setText(readResult.toString());
 
             return null;
