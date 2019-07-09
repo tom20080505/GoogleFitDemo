@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
@@ -279,12 +280,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     public void onSuccess(final DataReadResponse dataReadResponse) {
                         Log.w(TAG, "onSuccess(), dataReadResponse: " + Arrays.toString(dataReadResponse.getBuckets().toArray()));
 
-                        //runOnUiThread(new Runnable() {
-                        //    @Override
-                        //    public void run() {
-                        //        tvMsg.append("\n, 2 dataReadResponse: " + Arrays.toString(dataReadResponse.getBuckets().toArray()));
-                        //    }
-                        //});
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                tvMsg.setTextColor(Color.RED);
+                                tvMsg.append("\n, 2 dataReadResponse: " + Arrays.toString(dataReadResponse.getBuckets().toArray()));
+                            }
+                        });
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -301,6 +303,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 });
 
         new ResultTask().execute();
+
+        tvMsg.setTextColor(Color.BLUE);
+        tvMsg.append("result: " + resultString);
 
 
         //mlc add
@@ -328,53 +333,53 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     //    tvMsg.append("\n\t bloodPressure:" + bloodPressure.toString() );
     //}
 
-
-    public static void initialize(final FragmentActivity activity){
-        Log.w(TAG, " initialize(), ");
-        // Setup Callback listener
-        GoogleApiClient.ConnectionCallbacks connectionCallbacks = new GoogleApiClient.ConnectionCallbacks() {
-            @Override
-            public void onConnected(Bundle bundle) {
-                Log.i(TAG, "Connected! ");
-                // Now you can make calls to the Fitness APIs.
-                //subscribe();
-            }
-
-            @Override
-            public void onConnectionSuspended(int i) {
-                // If your connection to the sensor gets lost at some point,
-                // you'll be able to determine the reason and react to it here.
-                if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
-                    Log.i(TAG, "1 Connection lost.  Cause: Network Lost.");
-                } else if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
-                    Log.i(TAG, "2 Connection lost.  Reason: Service Disconnected");
-                }
-            }
-        };
-
-        // Handle Failed connection
-        GoogleApiClient.OnConnectionFailedListener connectionFailed = new GoogleApiClient.OnConnectionFailedListener() {
-            @Override
-            public void onConnectionFailed(@NonNull ConnectionResult result) {
-
-                Log.i(TAG, "3 Google Play services connection failed. Cause: " + result.toString());
-
-                Toast.makeText(activity, "4 Exception while connecting to Google Play services: " +
-                        result.getErrorMessage() + ":" + result.getErrorCode(), Toast.LENGTH_SHORT).show();
-
-            }
-        };
-
-
-        // Create Google Api Client
-        mGoogleApiClient = (OnDataPointListener) new GoogleApiClient.Builder(activity)
-                .addConnectionCallbacks(connectionCallbacks)
-                .enableAutoManage(activity, connectionFailed)
-                .addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE))
-                .addApi(Fitness.HISTORY_API)
-                .build();
-        //mGoogleApiClient.connect();
-    }
+String resultString = "";
+    //public static void initialize(final FragmentActivity activity){
+    //    Log.w(TAG, " initialize(), ");
+    //    // Setup Callback listener
+    //    GoogleApiClient.ConnectionCallbacks connectionCallbacks = new GoogleApiClient.ConnectionCallbacks() {
+    //        @Override
+    //        public void onConnected(Bundle bundle) {
+    //            Log.i(TAG, "Connected! ");
+    //            // Now you can make calls to the Fitness APIs.
+    //            //subscribe();
+    //        }
+    //
+    //        @Override
+    //        public void onConnectionSuspended(int i) {
+    //            // If your connection to the sensor gets lost at some point,
+    //            // you'll be able to determine the reason and react to it here.
+    //            if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
+    //                Log.i(TAG, "1 Connection lost.  Cause: Network Lost.");
+    //            } else if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
+    //                Log.i(TAG, "2 Connection lost.  Reason: Service Disconnected");
+    //            }
+    //        }
+    //    };
+    //
+    //    // Handle Failed connection
+    //    GoogleApiClient.OnConnectionFailedListener connectionFailed = new GoogleApiClient.OnConnectionFailedListener() {
+    //        @Override
+    //        public void onConnectionFailed(@NonNull ConnectionResult result) {
+    //
+    //            Log.i(TAG, "3 Google Play services connection failed. Cause: " + result.toString());
+    //
+    //            Toast.makeText(activity, "4 Exception while connecting to Google Play services: " +
+    //                    result.getErrorMessage() + ":" + result.getErrorCode(), Toast.LENGTH_SHORT).show();
+    //
+    //        }
+    //    };
+    //
+    //
+    //    // Create Google Api Client
+    //    mGoogleApiClient = (OnDataPointListener) new GoogleApiClient.Builder(activity)
+    //            .addConnectionCallbacks(connectionCallbacks)
+    //            .enableAutoManage(activity, connectionFailed)
+    //            .addScope(new Scope(Scopes.FITNESS_BODY_READ_WRITE))
+    //            .addApi(Fitness.HISTORY_API)
+    //            .build();
+    //    //mGoogleApiClient.connect();
+    //}
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -396,12 +401,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             final DataReadResult readResult = Fitness.HistoryApi.readData(mClient, readRequest).await();
 
             Log.w(TAG, " readResult: " + readResult.toString());
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    tvMsg.setText(readResult.toString());
-                }
-            });
+
+            resultString = readResult.toString();
+            //runOnUiThread(new Runnable() {
+            //    @Override
+            //    public void run() {
+            //        tvMsg.setText(readResult.toString());
+            //    }
+            //});
             //tvMsg.setText(readResult.toString());
 
             return null;
