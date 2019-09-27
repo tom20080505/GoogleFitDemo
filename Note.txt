@@ -1,0 +1,24 @@
+* Wed Jul 10 10:44:47 2019 +0800 : 8b33bcc : merge.
+* Tue Jul 9 16:34:36 2019 +0800 : 3b56002 : get google fit data from iClound OK!
+* Tue Jul 9 14:21:54 2019 +0800 : 6810b2e : test
+* Tue Jul 9 14:09:18 2019 +0800 : 57250d9 : debug not yet!
+* Fri Jul 5 16:53:09 2019 +0800 : 8181de1 : test & debug
+* Thu Jul 4 13:51:30 2019 +0800 : 8b8cbd7 : debug
+*   Thu Jun 27 16:48:26 2019 +0800 : 5ed96c7 : Merge branch 'master' of https://gitlab.com/risc604/googlefitdemo
+|\  
+* | Thu Jun 27 16:36:57 2019 +0800 : 3ab6f08 : test
+| * Thu Jun 27 15:49:34 2019 +0800 : ee87b8a : modify Data type.
+|/  
+*   Tue Jun 25 17:06:41 2019 +0800 : af9af56 : Merge branch 'master' of https://gitlab.com/risc604/googlefitdemo
+|\  
+* | Tue Jun 25 17:05:03 2019 +0800 : 4b5e72d : no message
+| * Tue Jun 25 16:47:49 2019 +0800 : ff8fbd8 : add test code.
+|/  
+* Mon Jun 3 10:17:05 2019 +0800 : b85f83e : debug
+* Thu May 30 17:22:15 2019 +0800 : b543786 : debug
+* Thu May 30 17:15:02 2019 +0800 : 5e3317e : add debug message.
+* Thu May 30 16:45:03 2019 +0800 : c40548e : authrization OK
+* Thu May 30 14:08:14 2019 +0800 : 5f61cbd : debug
+* Wed May 29 17:32:37 2019 +0800 : 7397ebd : add
+* Tue May 28 17:12:17 2019 +0800 : 3174958 : add fit API code. NOT yet !!
+* Tue May 28 14:12:41 2019 +0800 : 23af615 : init code
