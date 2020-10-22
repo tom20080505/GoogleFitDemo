@@ -1,3 +1,4 @@
+* Fri Sep 27 15:20:56 2019 +0800 : 49acc4c : add log file
 * Wed Jul 10 10:44:47 2019 +0800 : 8b33bcc : merge.
 * Tue Jul 9 16:34:36 2019 +0800 : 3b56002 : get google fit data from iClound OK!
 * Tue Jul 9 14:21:54 2019 +0800 : 6810b2e : test
